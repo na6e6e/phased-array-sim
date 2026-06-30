@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>フェーズドアレイ ビームフォーミング 視覚化</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>フェーズドアレイ ビームフォーミング</h1>
+    <div class="mode-tabs" role="tablist">
+      <button id="tab-tx" class="tab active" role="tab" data-mode="tx">送信 (Tx)</button>
+      <button id="tab-rx" class="tab" role="tab" data-mode="rx">受信 (Rx)</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 左: コントロール -->
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>アレイ設定</h2>
+
+        <label class="ctrl">
+          <span>素子数 <b id="val-N">8</b></span>
+          <input id="in-N" type="range" min="1" max="32" step="1" value="8" />
+        </label>
+
+        <label class="ctrl">
+          <span>素子間隔 d/λ <b id="val-d">0.50</b></span>
+          <input id="in-d" type="range" min="0.1" max="2.0" step="0.05" value="0.5" />
+        </label>
+
+        <label class="ctrl">
+          <span>振幅テーパー</span>
+          <select id="in-taper">
+            <option value="uniform">一様 (Uniform)</option>
+            <option value="hamming">ハミング (Hamming)</option>
+            <option value="hann">ハニング (Hann)</option>
+            <option value="blackman">ブラックマン (Blackman)</option>
+          </select>
+        </label>
+
+        <label class="ctrl">
+          <span>表示倍率 (px/λ) <b id="val-zoom">22</b></span>
+          <input id="in-zoom" type="range" min="10" max="50" step="1" value="22" />
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>位相設定</h2>
+        <div class="seg" id="phase-mode">
+          <button class="seg-btn active" data-pm="beam">ビーム角から設定</button>
+          <button class="seg-btn" data-pm="manual">手動 (素子ごと)</button>
+        </div>
+
+        <label class="ctrl" id="beam-ctrl">
+          <span>ビーム角 θ₀ <b id="val-beam">0°</b></span>
+          <input id="in-beam" type="range" min="-90" max="90" step="1" value="0" />
+        </label>
+
+        <div id="manual-phases" class="manual-phases hidden"></div>
+      </section>
+
+      <section class="panel" id="rx-panel">
+        <h2>受信 (Rx)</h2>
+        <label class="ctrl">
+          <span>到来角 θ<sub>in</sub> <b id="val-arr">20°</b></span>
+          <input id="in-arr" type="range" min="-90" max="90" step="1" value="20" />
+        </label>
+        <p class="hint">操作: 到来角を変えてビーム角 θ₀ と一致させると受信出力が最大になります。</p>
+      </section>
+
+      <section class="panel">
+        <h2>表示</h2>
+        <div class="seg" id="disp-mode">
+          <button class="seg-btn active" data-disp="wave">波紋 (瞬時)</button>
+          <button class="seg-btn" data-disp="intensity">強度 (積分)</button>
+        </div>
+        <label class="ctrl">
+          <span>アニメ速度 <b id="val-speed">1.0×</b></span>
+          <input id="in-speed" type="range" min="0" max="3" step="0.1" value="1" />
+        </label>
+        <label class="check"><input id="in-db" type="checkbox" /> ビームパターンを dB 表示</label>
+        <div class="btn-row">
+          <button id="btn-play" class="btn">⏸ 一時停止</button>
+          <button id="btn-reset" class="btn ghost">リセット</button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- 右: 可視化 -->
+    <section class="content">
+      <div class="card field-card">
+        <div class="card-head">
+          <h3 id="field-title">波動場 (送信)</h3>
+          <div class="legend" id="field-legend"></div>
+        </div>
+        <canvas id="field" width="640" height="460"></canvas>
+        <div class="readout" id="field-readout"></div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <div class="card-head"><h3>ビームパターン (アレイファクタ)</h3></div>
+          <canvas id="pattern" width="340" height="240"></canvas>
+          <div class="readout" id="pattern-readout"></div>
+        </div>
+
+        <div class="card" id="phasor-card">
+          <div class="card-head"><h3>素子出力の合成 (フェーザ)</h3></div>
+          <canvas id="phasor" width="340" height="240"></canvas>
+          <div class="readout" id="phasor-readout"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
